@@ -1,3 +1,4 @@
+import math
 import time
 
 from typing import Any, List, Type, Union, Iterable, Awaitable
@@ -39,7 +40,7 @@ class MessageQueue:
             )
 
     # TODO: batches
-    async def get(self, count: int = 1, timeout: float = 0) -> List[Message]:
+    async def get(self, count: int = 1, timeout: int = 0) -> List[Message]:
         if timeout != 0:
             start_time = time.time()
 
@@ -52,7 +53,7 @@ class MessageQueue:
             if timeout != 0 and start_time + timeout < time.time():
                 break
 
-            resp = await self._wait_one(start_time - time.time() + timeout)
+            resp = await self._wait_one(math.ceil(start_time - time.time() + timeout))
             if resp is not None:
                 # None is returned in case of timeout, but users may send None too
                 popped.append(Message._from_bzpopmax(resp, self._encoder))
@@ -62,7 +63,7 @@ class MessageQueue:
 
         return popped
 
-    def _wait_one(self, timeout: float) -> Awaitable[_RedisResponseType]:
+    def _wait_one(self, timeout: int) -> Awaitable[_RedisResponseType]:
         return self._redis.execute("BZPOPMAX", self._channel, timeout)
 
     async def _pop_all(self, count: int) -> Iterable[_RedisResponseType]:
