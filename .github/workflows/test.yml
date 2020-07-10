@@ -39,7 +39,7 @@ jobs:
           redis-version: ${{ matrix.redis-version }}
       - name: Test
         run: |
-          pytest pytest --cov --cov-report=xml
+          pytest --cov --cov-report=xml
       - name: Publish coverage
         run: |
           codecov -f coverage.xml
