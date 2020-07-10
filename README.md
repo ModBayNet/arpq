@@ -3,6 +3,12 @@ Asynchronous python library impementing priority queue based on Redis sorted set
 
 # Features
 - support for many producers/consumers
+- support for different encoders (json, msgpack, pickle, ...)
 
-# Note
-Currently arpq uses [aioredis](https://github.com/aio-libs/aioredis), but it is not maintained anymore. We are looking for the alternatives right now.
+# Panned features
+- support for different async redis libraries (aioredis, aredis, ...)
+- batch task processing
+- better control over encoders (passing different arguments for encode/decode)
+
+# Examples
+TODO

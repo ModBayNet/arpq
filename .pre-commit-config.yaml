@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.0.6
+    rev: 5.0.7
     hooks:
       - id: isort
 
@@ -26,4 +26,8 @@ repos:
     rev: v0.782
     hooks:
       - id: mypy
-        args: [--config-file=mypy.ini, --ignore-missing-imports]
+        args: []
+        exclude: >
+          (?x)^(
+              tests/.*
+          )$
