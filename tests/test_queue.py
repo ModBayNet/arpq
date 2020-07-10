@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from arpq import Message, JSONEncoder, MessageQueue
@@ -63,3 +65,20 @@ async def test_priority(redis_connection):
     await queue.put([msg_low, msg_high])
 
     assert high_priority_data == (await queue.get())[0].data
+
+
+async def test_timeout(redis_connection):
+    queue = MessageQueue(
+        redis_connection, "queue:test_timeout", encoder_cls=JSONEncoder
+    )
+    await queue.drain()
+
+    timeout = 3
+
+    await queue.put(Message(0, 42))
+    assert 1 == len(await queue.get(timeout=timeout))
+
+    start_time = time.time()
+
+    assert 0 == len(await queue.get(timeout=timeout))
+    assert time.time() - start_time > timeout
