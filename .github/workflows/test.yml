@@ -41,5 +41,7 @@ jobs:
         run: |
           pytest --cov --cov-report=xml
       - name: Publish coverage
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           codecov -f coverage.xml
