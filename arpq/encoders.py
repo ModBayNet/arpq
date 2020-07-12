@@ -28,6 +28,12 @@ class _Encoder(ABCEncoder):
 
 
 class JSONEncoder(_Encoder):
+    """
+    JSON encoder. Uses built-in json library.
+
+    Can only encode simple data types: ints, floats, strings, booleans, lists.
+    """
+
     encoder_import = "json"
 
     def encode(self, data: Any) -> bytes:
@@ -38,10 +44,22 @@ class JSONEncoder(_Encoder):
 
 
 class UJSONEncoder(JSONEncoder):
+    """
+    JSON encoder. Uses ujson library.
+
+    Can only encode simple data types: ints, floats, strings, booleans, lists.
+    """
+
     encoder_import = "ujson"
 
 
 class MSGPACKEncoder(_Encoder):
+    """
+    MSGPACK encoder. Uses msgpack library.
+
+    Can only encode simple data types: ints, floats, strings, booleans, lists.
+    """
+
     encoder_import = "msgpack"
 
     def encode(self, data: Any) -> bytes:
@@ -52,6 +70,13 @@ class MSGPACKEncoder(_Encoder):
 
 
 class MarshalEncoder(_Encoder):
+    """
+    Marshal encoder. Uses built-in marshal library. Only use when communicating between
+    python instances. May not work if different python versions are used.
+
+    Can only encode simple data types: ints, floats, strings, booleans, lists.
+    """
+
     encoder_import = "marshal"
 
     def encode(self, data: Any) -> bytes:
@@ -62,4 +87,11 @@ class MarshalEncoder(_Encoder):
 
 
 class PickleEncoder(MarshalEncoder):
+    """
+    Pickle encoder. Uses built-in pickle library. Only use when communicating between
+    python instances.
+
+    Can be used to encode complex python objects.
+    """
+
     encoder_import = "pickle"

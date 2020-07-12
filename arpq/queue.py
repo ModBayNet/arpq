@@ -1,7 +1,7 @@
 import math
 import time
 
-from typing import Any, List, Type, Union, Iterable, Awaitable
+from typing import Any, List, Type, Tuple, Union, Iterable, Awaitable
 
 from aioredis.abc import AbcConnection
 
@@ -14,7 +14,13 @@ _RedisResponseType = Any
 
 class MessageQueue:
 
-    __slots__ = ("_redis", "_channel", "_encoder")
+    """
+    Message queue based on sorted set Redis data type.
+
+    Can be used for both receiving and sending items.
+    """
+
+    __slots__ = frozenset(("_redis", "_channel", "_encoder"))
 
     def __init__(
         self,
@@ -28,19 +34,45 @@ class MessageQueue:
 
     # TODO: batches
     async def drain(self) -> List[Message]:
+        """Remove all items from queue and return them."""
+
         return await self.get(count=await self.get_length())
 
-    async def put(self, msg: Union[Message, Iterable[Message]]) -> None:
-        if not isinstance(msg, Iterable):
-            msg = [msg]
+    async def put(self, priority: int, data: Any) -> None:
+        """
+        Put a single item into queue. If item exists in queue, priority is increased by
+        `priority`.
+        """
 
-        for i in msg:
-            await self._redis.execute(
-                "ZINCRBY", self._channel, i.priority, self._encoder.encode(i.data)
-            )
+        await self._redis.execute(
+            "ZINCRBY", self._channel, priority, self._encoder.encode(data)
+        )
+
+    # TODO: batches?
+    async def put_many(self, pairs: Iterable[Tuple[int, Any]]) -> None:
+        """
+        Put multiple items into queue. Updates priorities of conficting items in queue.
+        """
+
+        # TODO: a more efficient way maybe?
+        args: List[Union[int, Any]] = []
+        for priority, data in pairs:
+            args.extend((priority, self._encoder.encode(data)))
+
+        await self._redis.execute(
+            "ZADD", self._channel, *args,
+        )
 
     # TODO: batches
     async def get(self, count: int = 1, timeout: int = 0) -> List[Message]:
+        """
+        Get items from queue. Can get multiple items at once.
+
+        If timeout is reached, returns all items received before timeout.
+        Timeout condition can be checked by comparing length of returned list vs
+        requested count.
+        """
+
         if timeout != 0:
             start_time = time.time()
 
@@ -67,17 +99,29 @@ class MessageQueue:
         return self._redis.execute("BZPOPMAX", self._channel, timeout)
 
     async def _pop_all(self, count: int) -> Iterable[_RedisResponseType]:
+        if count <= 0:
+            return ()
+
         popped = await self._redis.execute("ZPOPMAX", self._channel, count)
 
         # group responses into tuples: (data, priority)
         return list(zip(popped[::2], popped[1::2]))
 
     async def get_length(self) -> int:
+        """Return number of items in queue."""
+
         return await self._redis.execute("ZCARD", self._channel)
 
     async def is_empty(self) -> bool:
+        """Check if queue is empty or not."""
+
         return await self.get_length() == 0
 
     @property
     def channel(self) -> str:
+        """Redis queue channel ."""
+
         return self._channel
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} channel={self.channel}>"

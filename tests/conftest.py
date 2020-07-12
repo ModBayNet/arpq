@@ -13,6 +13,6 @@ def event_loop(request):
 
 @pytest.fixture(scope="session")
 async def redis_connection():
-    conn = await aioredis.create_connection("redis://localhost/0")
+    conn = await aioredis.create_connection(("localhost", 6379))
     yield conn
     conn.close()

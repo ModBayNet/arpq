@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from arpq import Message, JSONEncoder, MessageQueue
+from arpq import JSONEncoder, MessageQueue
 
 pytestmark = pytest.mark.asyncio
 
@@ -21,10 +21,9 @@ async def test_single_message(redis_connection):
     await queue.drain()
 
     data = "Hello World"
-    msg = Message(0, data)
-    await queue.put(msg)
+    await queue.put(0, data)
 
-    assert msg.data == (await queue.get())[0].data
+    assert data == (await queue.get())[0].data
 
 
 async def test_many_messages(redis_connection):
@@ -38,7 +37,7 @@ async def test_many_messages(redis_connection):
     assert 0 == await queue.get_length()
     assert await queue.is_empty()
 
-    await queue.put([Message(i, str(i)) for i in range(num_elements)])
+    await queue.put_many([(i, str(i)) for i in range(num_elements)])
 
     assert num_elements == await queue.get_length()
     assert not await queue.is_empty()
@@ -59,12 +58,20 @@ async def test_priority(redis_connection):
     low_priority_data = "low"
     high_priority_data = "high"
 
-    msg_low = Message(-10, low_priority_data)
-    msg_high = Message(10, high_priority_data)
+    msg_low = (-10, low_priority_data)
+    msg_high = (10, high_priority_data)
 
-    await queue.put([msg_low, msg_high])
+    await queue.put_many([msg_low, msg_high])
 
     assert high_priority_data == (await queue.get())[0].data
+
+    await queue.drain()
+
+    await queue.put(1, "test")
+    await queue.put(1, "test")
+
+    assert 1 == await queue.get_length()
+    assert 2 == (await queue.get())[0].priority
 
 
 async def test_timeout(redis_connection):
@@ -75,7 +82,7 @@ async def test_timeout(redis_connection):
 
     timeout = 3
 
-    await queue.put(Message(0, 42))
+    await queue.put(0, 42)
     assert 1 == len(await queue.get(timeout=timeout))
 
     start_time = time.time()
