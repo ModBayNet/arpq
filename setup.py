@@ -22,10 +22,8 @@ with open(init_py) as f:
     except IndexError:
         raise RuntimeError(f"Unable to find author in {init_py}")
 
-with open("requirements.txt", "r") as requiremetnts:
-    install_requires = [
-        line for line in requiremetnts.readlines() if not line.lstrip().startswith("#")
-    ]
+# TODO: remove hard dependency
+install_requires = ["aioredis"]
 
 classifiers = [
     "Development Status :: 3 - Alpha",

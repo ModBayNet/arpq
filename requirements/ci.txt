@@ -1,0 +1,9 @@
+# These are requirements for running CI test job
+-r lint.txt
+-r test.txt
+codecov
+pytest-cov
+
+# required for running tests
+msgpack
+ujson
