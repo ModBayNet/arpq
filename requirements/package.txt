@@ -1,0 +1,4 @@
+# This is requirements.txt equivalent
+
+# TODO: remove hard dependency
+aioredis

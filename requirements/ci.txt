@@ -1,6 +1,8 @@
 # These are requirements for running CI test job
+
 -r lint.txt
 -r test.txt
+-r package.txt
 codecov
 pytest-cov
 

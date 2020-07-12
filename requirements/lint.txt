@@ -1,4 +1,5 @@
 # These are requirements for linting
+
 black
 isort
 flake8
