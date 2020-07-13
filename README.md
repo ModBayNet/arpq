@@ -4,6 +4,7 @@ Asynchronous python library impementing priority queue based on Redis sorted set
 [![PyPI](https://img.shields.io/pypi/v/arpq)](https://pypi.org/project/arpq)
 [![Tests](https://github.com/ModBayNet/arpq/workflows/Test/badge.svg)](https://github.com/ModBayNet/arpq/actions)
 [![Codecov](https://codecov.io/gh/ModBayNet/arpq/branch/master/graph/badge.svg)](https://codecov.io/gh/ModBayNet/arpq)
+[![LGTM alerts](https://img.shields.io/lgtm/alerts/g/ModBayNet/arpq.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ModBayNet/arpq/alerts)
 
 # Features
 - support for many producers/consumers
