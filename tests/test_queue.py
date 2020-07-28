@@ -80,6 +80,8 @@ async def test_timeout(redis_connection):
     )
     await queue.drain()
 
+    await queue.get(timeout=0)
+
     timeout = 3
 
     await queue.put(0, 42)

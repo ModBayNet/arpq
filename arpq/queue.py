@@ -73,20 +73,22 @@ class MessageQueue:
         requested count.
         """
 
-        if timeout != 0:
-            start_time = time.time()
-
         popped: List[Message] = []
 
         for resp in await self._pop_all(count):
             popped.append(Message._from_zpopmax(resp, self._encoder))
 
+        start_time = time.time()
+
         while len(popped) < count:
-            if timeout != 0 and start_time + timeout < time.time():
+            if timeout <= 0 or start_time + timeout < time.time():
                 break
 
-            resp = await self._wait_one(math.ceil(start_time - time.time() + timeout))
-            if resp is not None:
+            if (
+                resp := await self._wait_one(
+                    math.ceil(start_time - time.time() + timeout)
+                )
+            ) is not None:
                 # None is returned in case of timeout, but users may send None too
                 popped.append(Message._from_bzpopmax(resp, self._encoder))
 
